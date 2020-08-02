@@ -20,7 +20,7 @@ class MyParser(argparse.ArgumentParser):
         sys.stderr.write('error: %s\n' % message)
         self.print_help()
         sys.exit(2)
-parser= MyParser(description='This script generates code for excuting family search')
+parser= MyParser(description='This script ')
 #parser = argparse.ArgumentParser()
 parser.add_argument('--listfile', help='3 columns, gene family, genome, full/all')
 args = parser.parse_args()
@@ -47,7 +47,7 @@ def main():
 
 	try:
 	#start filtering fasta file
-		with open(listfile, "rU") as handle: # rU means open for reading using universal readline mode this means you dont have to worry if the file uses Unix, Mac or DOS Windows style newline characters The with- statement makes sure that the file is properly closed after reading it
+		with open(listfile, "r") as handle: # rU means open for reading using universal readline mode this means you dont have to worry if the file uses Unix, Mac or DOS Windows style newline characters The with- statement makes sure that the file is properly closed after reading it
 			
 			##read in gene name, genomes and create working dir and copy commands, modify command
 			for line in handle:
@@ -75,7 +75,8 @@ def main():
 							shutil.rmtree(newpath)
 						os.mkdir(newpath) #create new dir
 						##copy commands
-						subprocess.call("cp scripts/* {}/".format(newpath),shell=True )
+						#subprocess.call("cp scripts/* {}/".format(newpath),shell=True )
+						copytree("scripts", "{}".format(newpath))
 						##change blastcmd
 						with open("{}/1.blast.cmd.sh".format(newpath), "rt") as fin:
 							with open("{}/1.blast.cmd.edited.sh".format(newpath), "wt") as fout:
@@ -100,7 +101,7 @@ def main():
 									fout.write(line)
 						
 						#start family search
-						subprocess.call("nohup bash {}/1.blast.cmd.edited.sh >{}/nohup.log &".format(newpath,newpath),shell=True )
+						#subprocess.call("nohup bash {}/1.blast.cmd.edited.sh >{}/nohup.log &".format(newpath,newpath),shell=True )
 			
 			
 			
@@ -124,5 +125,13 @@ def PrintException():
     line = linecache.getline(filename, lineno, f.f_globals)
     print('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj))
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 	
 if __name__ == "__main__": main()

@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+#this script extract GO terms associated with each AGAP identifier
 from collections import defaultdict
 import argparse
 import sys
