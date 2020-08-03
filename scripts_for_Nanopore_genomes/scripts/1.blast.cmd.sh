@@ -7,7 +7,7 @@ perc_identity_cutoff=85
 mapHspGap=0
 minTcTSLength=150
 
-all_and_full=/home/duopeng/gene_member_search/all_and_full
+input_families=/home/duopeng/gene_member_search/input_families
 genefamilygff=dummy.gff
 
 #parameter setting [case to case bases]
@@ -19,16 +19,16 @@ all_or_full=all_or_full_placeholder #full or all
 
 genefamilyfasta=''
 if [ ${all_or_full} == "full" ]; then
-	genefamilyfasta=${all_and_full}/${familyname}/Full_ClBrener_${familyname}_DNA_sequence.fasta
+	genefamilyfasta=${input_families}/${familyname}/Full_ClBrener_${familyname}_DNA_sequence.fasta
 fi
 if [ ${all_or_full} == "all" ]; then
-	genefamilyfasta=${all_and_full}/${familyname}/All_ClBrener_${familyname}_DNA_sequence.fasta	
+	genefamilyfasta=${input_families}/${familyname}/All_ClBrener_${familyname}_DNA_sequence.fasta	
 fi	
 if [ ${all_or_full} == "WW" ]; then
-	genefamilyfasta=${all_and_full}/${familyname}/WW_${genome_name}_${familyname}_DNA_sequence.fasta	
+	genefamilyfasta=${input_families}/${familyname}/WW_${genome_name}_${familyname}_DNA_sequence.fasta	
 fi	
 if [ ${all_or_full} == "40ts" ]; then
-	genefamilyfasta=${all_and_full}/${familyname}/40ts_${familyname}_DNA_sequence.fasta	
+	genefamilyfasta=${input_families}/${familyname}/40ts_${familyname}_DNA_sequence.fasta	
 fi	
 
 genomefasta=${genome_name}.fasta  
