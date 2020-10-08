@@ -1,4 +1,4 @@
-# Pipeline built to search members of large gene families in Pacbio/Nanopore genomes
+# Pipeline that search for members of large gene families in Pacbio/Nanopore genomes
 
 
 ## Getting Started
