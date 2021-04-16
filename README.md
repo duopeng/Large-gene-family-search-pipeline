@@ -5,7 +5,7 @@ Linux-like environment
 
 Two executable programs "blastn" and "makeblastdb" from the ncbi-blast suite (tested with version 2.8.1+)
 
-Python3 (tested with version 3.7.0)
+Python3 (tested with version 3.8.5)
 
 PERL (tested with v5.18.2)
 
@@ -15,7 +15,15 @@ Bioperl (tested with v1.006924)
 ## Getting Started
 The scripts folder contains scripts and input files for a working example, in which the the T cruzi genome is searched for mucin gene family members
 
-To start the analysis, first configure parameters in the shell script file "start_analysis.sh". Then you can either call your shell to run the file or execute line-by-line in your shell command line
+To start the example search: just execute the shell script file "start_search.sh". For example "bash start_search.sh"
+
+To start your custom search, please configure parameters in the shell script file "start_analysis.sh" (using a text editor).
+
+Next, open script file "parse_blastout.py" and edit line 19. Change the gene name that is between the two quotation marks.
+
+Then you can either execute the shell script file "start_search.sh" or execute line-by-line in your shell command line
+
+After running all steps, you should see a file named "result.fasta" which contains gene family members found.
 
 ##### Folder Structure:
 ```
