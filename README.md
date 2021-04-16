@@ -25,7 +25,7 @@ makeblastdb_path="" #path to makeblastdb program
 then execute the shell script file "start_search.sh". For example "bash start_search.sh"
 
 
-To start your custom search, please configure parameters in the shell script file "start_analysis.sh" (using a text editor).
+To start your custom search, please configure input file parameters (lines 8-11) in the shell script file "start_analysis.sh" (using a text editor).
 
 Next, open script file "parse_blastout.py" and edit line 19. Change the gene name that is between the two quotation marks.
 

@@ -3,7 +3,7 @@ $|++;
 use strict;
 use warnings;
 use Getopt::Long;
-use Pod::Usage; 
+use Pod::Usage;
 use Bio::Perl;
 use Bio::Seq;
 use Bio::SeqIO;
@@ -24,13 +24,13 @@ my $message_text  = "please specify option parameters. -i <blastout file> -g <ge
   my $filehandle    = \*STDERR;   ## The filehandle to write to
 GetOptions ('i=s' => \$file,'g=s' => \$genomefasta,'maxhspgap=s' => \$maxgaplenintcts,'minTcTSLength=s' => \$mintctslengthcutoff, 'gff=s' => \$gfffile, 'familyfasta=s' => \$familyfasta);
 pod2usage( { -message => $message_text ,
-               -exitval => $exit_status  ,  
-               -verbose => $verbose_level,  
+               -exitval => $exit_status  ,
+               -verbose => $verbose_level,
                -output  => $filehandle } ) if ($file eq '' or $genomefasta eq '');
 
 open STATOUT, ">stats.final.txt";
 
-##################################			   
+##################################
 ##get all the contig seqs
 ##################################
 my %contigs;
@@ -65,8 +65,8 @@ my %coords;
           $coords{$id}{"start"}=$line[3];
 		  $coords{$id}{"end"}=$line[4];
 		  $coords{$id}{"strand"}=$line[6];
-		  $coords{$id}{"desc"}=$desc; 
-		}	
+		  $coords{$id}{"desc"}=$desc;
+		}
 	}
 }
 
@@ -78,7 +78,7 @@ my $seqio4=Bio::SeqIO->new(-format => 'Fasta', -file=>"$familyfasta");
 my $inputcount=0;
 while(my $seqobj=$seqio4->next_seq)
 {
-	my $id=$seqobj->id; 
+	my $id=$seqobj->id;
 	#print($id."\n");
 	#$id=~/Parent=(.+?)\|/; #extract |Parent=a2dd0951-a251-49ca-a2de-e65db7e314ac-CDS:gene|
 	#print($1."\n");
@@ -93,8 +93,8 @@ print STATOUT "$inputcount\n";
 ######parsing the blastout file and get the best match#######
 ####################################################################
 my %markedcontigs;
-my $in = new Bio::SearchIO(-format => 'blast', 
-                           -file   => "$file");                          
+my $in = new Bio::SearchIO(-format => 'blast',
+                           -file   => "$file");
 my $maxmatchlen=0;
 open DIAG, ">diag.txt";
 
@@ -105,13 +105,13 @@ my $queryname=$result->query_name;
 #print "result: ".$queryname."\n";
 
 while(my $hit = $result->next_hit) {
-		
-		
+
+
 		my $hitname=$hit->name;
         my $hitdesc=$hit->description;
 		#print "hit: ".$hitname."\n";
-		 		 
-	while( my $hsp = $hit->next_hsp) { 
+
+	while( my $hsp = $hit->next_hsp) {
 
 			my $hspstrand=$hsp->strand('hit');
 			my $hspstart=$hsp->start('hit');
@@ -124,14 +124,14 @@ while(my $hit = $result->next_hit) {
 				my $v1=$markedcontigs{$hitname};
 				my %v1=%$v1;
 				my $newhspflag=1;
-			
+
 			LOOPOVERHSP: foreach my $keynum (sort keys %v1)  # go through all hash-stored hsp groups in current contig (hitname)
 			{
 				my $keystart=$v1{$keynum}{'start'};
 				my $keyend=$v1{$keynum}{'end'};
 				my $keyhsplength=$keyend-$keystart;
-				
-				if ($hspend<=$keyend and $hspstart>=$keystart) # hsp is bracketed within marked region 
+
+				if ($hspend<=$keyend and $hspstart>=$keystart) # hsp is bracketed within marked region
 				{
 					$newhspflag=0;
 					#print "bracketed by $keynum $keystart $keyend\n";
@@ -142,7 +142,7 @@ while(my $hit = $result->next_hit) {
 					$v1{$keynum}{'start'}=$hspstart;
 					$v1{$keynum}{'end'}=$hspend;
 					$markedcontigs{$hitname}{$keynum}{'start'}=$hspstart;
-					$markedcontigs{$hitname}{$keynum}{'end'}=$hspend;					
+					$markedcontigs{$hitname}{$keynum}{'end'}=$hspend;
 					$markedcontigs{$hitname}{$keynum}{'strand'}=$hspstrand;
 					$newhspflag=0;
 					#print "bracketing $keynum $keystart $keyend\n";
@@ -158,7 +158,7 @@ while(my $hit = $result->next_hit) {
 					{
 						$markedcontigs{$hitname}{$keynum}{'strand'}=$hspstrand;
 					}
-					
+
 					#print "hsp is overlapping the right of $keynum $keystart $keyend\n";
 					last LOOPOVERHSP;
 				}
@@ -187,7 +187,7 @@ while(my $hit = $result->next_hit) {
 					}
 					#print "hsp is on the left of $keynum $keystart $keyend\n";
 					last LOOPOVERHSP;
-				}				
+				}
 				if ($hspstart>=$keyend and $hspstart<=($keyend+$maxgaplenintcts) and $hsplength>=100) # hsp is on region's right side, merge if distance <=maxgaplenintcts, and hsp>=100bp
 				{
 					$v1{$keynum}{'end'}=$hspend;
@@ -201,7 +201,7 @@ while(my $hit = $result->next_hit) {
 					#print "hsp is on the right of $keynum $keystart $keyend\n";
 					last LOOPOVERHSP;
 				}
-				
+
 			}
 			my $keynummax=0;
 			foreach my $keynum (sort keys %v1)# get the largest key #
@@ -213,18 +213,18 @@ while(my $hit = $result->next_hit) {
 			{
 					my $newkeynum=$keynummax+1;
 					$markedcontigs{$hitname}{$newkeynum}{'start'}=$hspstart;
-					$markedcontigs{$hitname}{$newkeynum}{'end'}=$hspend;				
+					$markedcontigs{$hitname}{$newkeynum}{'end'}=$hspend;
 					$markedcontigs{$hitname}{$newkeynum}{'strand'}=$hspstrand;
-					#print "this hsp $hspstart $hspend is a new hsp on $hitname\n";					
+					#print "this hsp $hspstart $hspend is a new hsp on $hitname\n";
 			}
 		}
 		else{  #initialize hash, mark a new region on hit
 			$markedcontigs{$hitname}{1}{'start'}=$hspstart;
-			$markedcontigs{$hitname}{1}{'end'}=$hspend;		
-			$markedcontigs{$hitname}{1}{'strand'}=$hspstrand;		
-			#print "initializing the first hsp $hspstart $hspend on $hitname\n";	
+			$markedcontigs{$hitname}{1}{'end'}=$hspend;
+			$markedcontigs{$hitname}{1}{'strand'}=$hspstrand;
+			#print "initializing the first hsp $hspstart $hspend on $hitname\n";
 		}
-		
+
 		}
 	}
 }
@@ -233,7 +233,7 @@ my $markedregioncount= 0;
 foreach my $hitname (sort keys %markedcontigs)
 	{
 		my $v1=$markedcontigs{$hitname};
-		my %v1=%$v1;	
+		my %v1=%$v1;
 		foreach my $keynum (sort keys %v1)  # go through all hash-stored hsp groups in current contig (hitname)
 			{
 				$markedregioncount+=1;
@@ -242,7 +242,7 @@ foreach my $hitname (sort keys %markedcontigs)
 print "The count of marked regions is $markedregioncount\n";
 print STATOUT "$markedregioncount\n";
 
-##finishing parsing the blastout results			   
+##finishing parsing the blastout results
 ##merging hsps again
 #loopthroughhspNmerge();
 #loopthroughhspNmerge();
@@ -266,13 +266,13 @@ foreach my $contig (sort keys %markedcontigs)
 				my $hspstrand=$v1{$keynum1}{'strand'};
 				my $hsplength=($hspend-$hspstart+1);
 				my $merged_flag=0;
-				
+
 
 				for my $contig_merged (sort keys %markedcontigs_merged) #go through merged ts
 				{
 					my $z1=$markedcontigs_merged{$contig_merged};
 					my %z1=%$z1;
-					#print $contig."\n";					
+					#print $contig."\n";
 					next if $contig ne $contig_merged;
 					#print "try merging gene on same chr\n";
 					#print $contig."\n";
@@ -287,7 +287,7 @@ foreach my $contig (sort keys %markedcontigs)
 						###near identical start and end###
 						if ($hspstart<=$hspstart_merged and $hspstart>=$hspstart_merged-10
 						   or $hspend>=$hspend_merged and $hspend<=$hspstart_merged+10 )
-						{   
+						{
 							my $new_start=min($hspstart,$hspstart_merged);
 							my $new_end=max($hspend,$hspend_merged);
 							#update start and end
@@ -303,11 +303,11 @@ foreach my $contig (sort keys %markedcontigs)
 							#print "merging $hspstart $hspend , $hspstart_merged $hspend_merged, result $new_start $new_end\n";
 						}
 						### hsp is bracketed within merged region ###
-						if ($hspstart_merged<=$hspstart and $hspend<=$hspend_merged ) 
+						if ($hspstart_merged<=$hspstart and $hspend<=$hspend_merged )
 						{
 							$merged_flag=1;
 							#print "bracketed by $keynum $keystart $keyend\n";
-						}						
+						}
 						## merged region is bracketed within hsp, and the difference is >=50bp
 						if (($hspstart<=$hspstart_merged and $hspend_merged<=$hspend))
 						{
@@ -317,7 +317,7 @@ foreach my $contig (sort keys %markedcontigs)
 							$merged_flag=1;
 						}
 						### hsp overlaps merged region on regions's right side, and overlap is >=50bp
-						if ($hspend>=$hspend_merged and $hspstart<=$hspend_merged and ($hspend_merged-$hspstart)>=50) 
+						if ($hspend>=$hspend_merged and $hspstart<=$hspend_merged and ($hspend_merged-$hspstart)>=50)
 						{
 							$markedcontigs_merged{$contig_merged}{$keynum2}{'end'}=$hspend;
 							##determine strand of the modified markedcontigs
@@ -328,7 +328,7 @@ foreach my $contig (sort keys %markedcontigs)
 							$merged_flag=1;
 						}
 						### hsp overlaps marked region on region's left side, and overlap is >=50bp
-						if ($hspend>=$hspstart_merged and $hspstart<=$hspstart_merged and ($hspend-$hspstart_merged)>=50) 
+						if ($hspend>=$hspstart_merged and $hspstart<=$hspstart_merged and ($hspend-$hspstart_merged)>=50)
 						{
 							$markedcontigs_merged{$contig_merged}{$keynum2}{'start'}=$hspstart;
 							##determine strand of the modified markedcontigs
@@ -340,7 +340,7 @@ foreach my $contig (sort keys %markedcontigs)
 							$merged_flag=1;
 						}
 						### hsp is on region's left side, merge if distance <=maxgaplenintcts, and hsp>=100bp
-						if ($hspend<=$hspstart_merged and $hspend>=($hspstart_merged-$maxgaplenintcts) and $hsplength>=100) 
+						if ($hspend<=$hspstart_merged and $hspend>=($hspstart_merged-$maxgaplenintcts) and $hsplength>=100)
 						{
 							$markedcontigs_merged{$contig_merged}{$keynum2}{'start'}=$hspstart;
 							##determine strand of the modified markedcontigs
@@ -350,9 +350,9 @@ foreach my $contig (sort keys %markedcontigs)
 							}
 							#print "MERGING, hsp is on the left of $keynum $keystart $keyend\n";
 							$merged_flag=1;
-						}	
+						}
 						### hsp is on region's right side, merge if distance <=maxgaplenintcts, and hsp>=100bp
-						if ($hspstart>=$hspend_merged and $hspstart<=($hspend_merged+$maxgaplenintcts) and $hsplength>=100) 
+						if ($hspstart>=$hspend_merged and $hspstart<=($hspend_merged+$maxgaplenintcts) and $hsplength>=100)
 						{
 							$markedcontigs_merged{$contig_merged}{$keynum2}{'end'}=$hspend;
 							##determine strand of the modified markedcontigs
@@ -363,28 +363,28 @@ foreach my $contig (sort keys %markedcontigs)
 							#print "MERGING, hsp is on the right of $keynum $keystart $keyend\n";
 							$merged_flag=1;
 						}
-				
+
 					}
 				}
-				
+
 				if ($merged_flag==0) # add new gene
 				{
 					$markedcontigs_merged{$contig}{$keynum1}{'start'}=$hspstart;
-					$markedcontigs_merged{$contig}{$keynum1}{'end'}=$hspend;	
+					$markedcontigs_merged{$contig}{$keynum1}{'end'}=$hspend;
 					$markedcontigs_merged{$contig}{$keynum1}{'strand'}=$hspstrand;
-					
+
 				}
-				
-				##... 
+
+				##...
 
 	}
-	
+
 }
 my $mergedregioncount= 0;
 foreach my $hitname (sort keys %markedcontigs_merged)
 	{
 		my $v1=$markedcontigs_merged{$hitname};
-		my %v1=%$v1;	
+		my %v1=%$v1;
 		foreach my $keynum (sort keys %v1)  # go through all hash-stored hsp groups in current contig (hitname)
 			{
 				$mergedregioncount+=1;
@@ -411,13 +411,13 @@ foreach my $contig (sort keys %markedcontigs_merged)
 				my $hspstrand=$v1{$keynum1}{'strand'};
 				my $hsplength=($hspend-$hspstart+1);
 				my $merged_flag=0;
-				
+
 
 				for my $contig_merged (sort keys %markedcontigs_merged2) #go through merged ts
 				{
 					my $z1=$markedcontigs_merged2{$contig_merged};
 					my %z1=%$z1;
-					#print $contig."\n";					
+					#print $contig."\n";
 					next if $contig ne $contig_merged;
 					#print "try merging gene on same chr\n";
 					#print $contig."\n";
@@ -432,7 +432,7 @@ foreach my $contig (sort keys %markedcontigs_merged)
 						###near identical start and end###
 						if ($hspstart<=$hspstart_merged and $hspstart>=$hspstart_merged-10
 						   or $hspend>=$hspend_merged and $hspend<=$hspstart_merged+10 )
-						{   
+						{
 							my $new_start=min($hspstart,$hspstart_merged);
 							my $new_end=max($hspend,$hspend_merged);
 							#update start and end
@@ -448,11 +448,11 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							#print "merging $hspstart $hspend , $hspstart_merged $hspend_merged, result $new_start $new_end\n";
 						}
 						### hsp is bracketed within merged region ###
-						if ($hspstart_merged<=$hspstart and $hspend<=$hspend_merged ) 
+						if ($hspstart_merged<=$hspstart and $hspend<=$hspend_merged )
 						{
 							$merged_flag=1;
 							#print "bracketed by $keynum $keystart $keyend\n";
-						}						
+						}
 						## merged region is bracketed within hsp, and the difference is >=50bp
 						if (($hspstart<=$hspstart_merged and $hspend_merged<=$hspend))
 						{
@@ -462,7 +462,7 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							$merged_flag=1;
 						}
 						### hsp overlaps merged region on regions's right side, and overlap is >=50bp
-						if ($hspend>=$hspend_merged and $hspstart<=$hspend_merged and ($hspend_merged-$hspstart)>=50) 
+						if ($hspend>=$hspend_merged and $hspstart<=$hspend_merged and ($hspend_merged-$hspstart)>=50)
 						{
 							$markedcontigs_merged2{$contig_merged}{$keynum2}{'end'}=$hspend;
 							##determine strand of the modified markedcontigs
@@ -473,7 +473,7 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							$merged_flag=1;
 						}
 						### hsp overlaps marked region on region's left side, and overlap is >=50bp
-						if ($hspend>=$hspstart_merged and $hspstart<=$hspstart_merged and ($hspend-$hspstart_merged)>=50) 
+						if ($hspend>=$hspstart_merged and $hspstart<=$hspstart_merged and ($hspend-$hspstart_merged)>=50)
 						{
 							$markedcontigs_merged2{$contig_merged}{$keynum2}{'start'}=$hspstart;
 							##determine strand of the modified markedcontigs
@@ -485,7 +485,7 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							$merged_flag=1;
 						}
 						### hsp is on region's left side, merge if distance <=maxgaplenintcts, and hsp>=100bp
-						if ($hspend<=$hspstart_merged and $hspend>=($hspstart_merged-$maxgaplenintcts) and $hsplength>=100) 
+						if ($hspend<=$hspstart_merged and $hspend>=($hspstart_merged-$maxgaplenintcts) and $hsplength>=100)
 						{
 							$markedcontigs_merged2{$contig_merged}{$keynum2}{'start'}=$hspstart;
 							##determine strand of the modified markedcontigs
@@ -495,9 +495,9 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							}
 							#print "hsp is on the left of $keynum $keystart $keyend\n";
 							$merged_flag=1;
-						}	
+						}
 						### hsp is on region's right side, merge if distance <=maxgaplenintcts, and hsp>=100bp
-						if ($hspstart>=$hspend_merged and $hspstart<=($hspend_merged+$maxgaplenintcts) and $hsplength>=100) 
+						if ($hspstart>=$hspend_merged and $hspstart<=($hspend_merged+$maxgaplenintcts) and $hsplength>=100)
 						{
 							$markedcontigs_merged2{$contig_merged}{$keynum2}{'end'}=$hspend;
 							##determine strand of the modified markedcontigs
@@ -508,28 +508,28 @@ foreach my $contig (sort keys %markedcontigs_merged)
 							#print "hsp is on the right of $keynum $keystart $keyend\n";
 							$merged_flag=1;
 						}
-				
+
 					}
 				}
-				
+
 				if ($merged_flag==0) # add new gene
 				{
 					$markedcontigs_merged2{$contig}{$keynum1}{'start'}=$hspstart;
-					$markedcontigs_merged2{$contig}{$keynum1}{'end'}=$hspend;	
+					$markedcontigs_merged2{$contig}{$keynum1}{'end'}=$hspend;
 					$markedcontigs_merged2{$contig}{$keynum1}{'strand'}=$hspstrand;
-					
+
 				}
-				
-				##... 
+
+				##...
 
 	}
-	
+
 }
 my $mergedregioncount2= 0;
 foreach my $hitname (sort keys %markedcontigs_merged2)
 	{
 		my $v1=$markedcontigs_merged2{$hitname};
-		my %v1=%$v1;	
+		my %v1=%$v1;
 		foreach my $keynum (sort keys %v1)  # go through all hash-stored hsp groups in current contig (hitname)
 			{
 				$mergedregioncount2+=1;
@@ -547,7 +547,7 @@ my @genomefasta=split (/\//,$genomefasta);
 my $genomename =	$genomefasta[$#genomefasta];
 #print $genomename."\n";
 #print "start to output genes\n";
-open OUT, ">$file.$genomename.mintctslengthcutoff$mintctslengthcutoff.maxgaplenintcts$maxgaplenintcts.fasta" or die; # open file to store result
+open OUT, ">$file.mintctslengthcutoff$mintctslengthcutoff.maxgaplenintcts$maxgaplenintcts.fasta" or die; # open file to store result
 foreach my $contig (sort keys %markedcontigs_merged2)
 {
 	my $v1=$markedcontigs_merged2{$contig};
@@ -564,7 +564,7 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 				##check if current ts is a known ts
 				##insert code here
 				##...
-				#print "${contig}_${hspstart}_${hspend}\n"; 
+				#print "${contig}_${hspstart}_${hspend}\n";
 				#go through all ts to check for overlapping with known ts
 				my $overlap_flag=0;
 				my $existing_ID=""; # store ID if current ts overlaps with a ID
@@ -575,14 +575,14 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 					#print "on same chr\n";
 					my $ts_start=$coords{$known_ID}{"start"};
 					my $ts_end=$coords{$known_ID}{"end"};
-					
+
 					next if $hspstart<=$ts_start and $hspend>=$ts_end ;             #hsp brackets ts, use hsp's coord, and mask the known ts gene
-					
+
 					if (   ($hspstart>=($ts_start+10) and $hspstart<=($ts_end-10) and (($ts_end-$hspstart)/$hsplength)>=0.9)    #hsp start is in ts, and overlap is larger than 90% length of hsp
 						or ($hspend>=($ts_start+10) and $hspend<=($ts_end-10)  and (($hspend-$ts_start)/$hsplength)>=0.9)       #hsp end is in ts, and overlap is larger than 90% length of hsp
 						or ($ts_start<=$hspstart and $ts_end>=$hspend )             #hsp is bracked by ts
-						
-						) 
+
+						)
 					{
 						#print "overlap found\nts:${ts_start}-$ts_end\thsp:${hspstart}-$hspend $known_ID\n";
 						$overlap_flag=1;
@@ -598,7 +598,7 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 					}
 
 				}
-				##... 
+				##...
 				if ($overlap_flag==1) #existing family member
 				{
 					if (exists $familyfasta{$existing_ID}) #current ID is in familyfasta, thus directly output sequence
@@ -609,8 +609,8 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 					else #no sequence, this maybe a pseudogene or not a true family member , need to fetch sequence
 					{
 						#print "NO SEQUENCE FOR $existing_ID\n" ;
-						
-						##code to fetch sequence here 
+
+						##code to fetch sequence here
 						my $contig_2_fetch=$coords{$existing_ID}{"chr"};
 						my $start_2_fetch=$coords{$existing_ID}{"start"};
 						my $end_2_fetch=$coords{$existing_ID}{"end"};
@@ -618,7 +618,7 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 						my $strand_2_fetch=$coords{$existing_ID}{"strand"};
 						my $contig_seq=$contigs{$contig_2_fetch};
 						my $gene_seq=substr($contig_seq,$start_2_fetch-1,$length);
-						
+
 						if ($strand_2_fetch eq "+")
 						{
 							print OUT ">".$existing_ID."\n".$gene_seq."\n" if !(exists $printed_genes{$existing_ID});
@@ -642,7 +642,7 @@ foreach my $contig (sort keys %markedcontigs_merged2)
 					$printed_genes{$tctspiece_id}=1;
 				}
 	}
-	
+
 }
 
 ###########################end of main program##########################################
@@ -665,9 +665,9 @@ foreach my $contig (sort keys %markedcontigs)
 			my $keystart=$v1{$keynum2}{'start'};
 			my $keyend=$v1{$keynum2}{'end'};
 
-				if ($hspend<=$keyend and $hspstart>=$keystart) # hsp is bracketed within marked region 
+				if ($hspend<=$keyend and $hspstart>=$keystart) # hsp is bracketed within marked region
 				{
-					
+
 					#print "bracketed by $keynum2 $keystart $keyend\n";
 					delete $markedcontigs{$contig}{$keynum1};
 					delete $v1{$keynum1};
@@ -684,7 +684,7 @@ foreach my $contig (sort keys %markedcontigs)
 				{
 					$v1{$keynum2}{'end'}=$hspend;
 					delete $markedcontigs{$contig}{$keynum1};
-					delete $v1{$keynum1};					
+					delete $v1{$keynum1};
 					#print "hsp is overlapping the right of $keynum2 $keystart $keyend\n";
 					last LOOPOVERHSP;
 				}
@@ -692,7 +692,7 @@ foreach my $contig (sort keys %markedcontigs)
 				{
 					$v1{$keynum2}{'start'}=$hspstart;
 					delete $markedcontigs{$contig}{$keynum1};
-					delete $v1{$keynum1};					
+					delete $v1{$keynum1};
 					#print "hsp is overlapping the left of $keynum2 $keystart $keyend\n";
 					last LOOPOVERHSP;
 				}
@@ -700,18 +700,18 @@ foreach my $contig (sort keys %markedcontigs)
 				{
 					$v1{$keynum2}{'start'}=$hspstart;
 					delete $markedcontigs{$contig}{$keynum1};
-					delete $v1{$keynum1};					
+					delete $v1{$keynum1};
 					#print "hsp is on the left of $keynum2 $keystart $keyend\n";
 					last LOOPOVERHSP;
-				}				
+				}
 				if ($hspstart>=$keyend and $hspstart<=($keyend+300)) # hsp is on region's right side, merge if distance <=300
 				{
 					$v1{$keynum2}{'end'}=$hspend;
 					delete $markedcontigs{$contig}{$keynum1};
-					delete $v1{$keynum1};					
+					delete $v1{$keynum1};
 					#print "hsp is on the right of $keynum2 $keystart $keyend\n";
 					last LOOPOVERHSP;
-				}	
+				}
 	}
 }
 
