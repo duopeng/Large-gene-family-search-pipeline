@@ -44,4 +44,4 @@ rm ${perc_identity_cutoff}perc_${minTcTSLength}minlen_${mapHspGap}maxgap.blast2t
 printf "\n\nadjusting gene boundaries..."
 python3 adjust_start_stop_codon.py --fastafile 85perc_150minlen_0maxgap.blast2transcripts.blastoutxml.parsedNfiltered
 
-printf '\n\ndone'
+printf '\n\ndone\n'
