@@ -15,7 +15,10 @@ Bioperl (tested with v1.006924)
 ## Getting Started
 The scripts folder contains scripts and input files for a working example, in which the the T cruzi genome is searched for mucin gene family members
 
-To start the example search: just execute the shell script file "start_search.sh". For example "bash start_search.sh"
+To start the example search, you have to first configure the following two parameter in the shell script file "start_search.sh"
+BLASTN_path=""      #path to blastn program
+makeblastdb_path="" #path to makeblastdb program
+then execute the shell script file "start_search.sh". For example "bash start_search.sh"
 
 To start your custom search, please configure parameters in the shell script file "start_analysis.sh" (using a text editor).
 
